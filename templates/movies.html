@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Lumeora — Results</title>
+
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background-color: #141414;
+      color: #ffffff;
+      font-family: 'Segoe UI', sans-serif;
+    }
+
+    nav {
+      background-color: #000;
+      padding: 16px 40px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    nav h1 {
+      color: #e50914;
+      letter-spacing: 2px;
+    }
+
+    nav a {
+      color: #aaa;
+      text-decoration: none;
+    }
+
+    nav a:hover { color: #fff; }
+
+    .results-header {
+      padding: 30px 40px 10px;
+    }
+
+    .movie-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 20px;
+      padding: 20px 40px 40px;
+    }
+
+    .movie-card {
+      background: #1f1f1f;
+      border-radius: 10px;
+      overflow: hidden;
+      border: 1px solid #2a2a2a;
+      transition: 0.2s;
+    }
+
+    .movie-card:hover {
+      transform: translateY(-5px);
+      border-color: #e50914;
+    }
+
+    .poster-wrapper {
+      height: 280px;
+      overflow: hidden;
+    }
+
+    .poster-wrapper img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .movie-info {
+      padding: 12px;
+    }
+
+    .movie-info h4 {
+      font-size: 15px;
+      margin-bottom: 6px;
+    }
+
+    .movie-meta {
+      font-size: 12px;
+      color: #aaa;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .review-form {
+      padding: 12px;
+      border-top: 1px solid #2a2a2a;
+    }
+
+    .review-form textarea {
+      width: 100%;
+      background: #2a2a2a;
+      border: 1px solid #3a3a3a;
+      color: #fff;
+      border-radius: 6px;
+      padding: 8px;
+      margin-top: 8px;
+      font-size: 13px;
+    }
+
+    .btn-submit {
+      width: 100%;
+      margin-top: 8px;
+      padding: 8px;
+      background: #e50914;
+      border: none;
+      border-radius: 6px;
+      color: #fff;
+      cursor: pointer;
+    }
+
+    .btn-submit:hover { background: #f40612; }
+
+    .star-rating {
+      display: flex;
+      flex-direction: row-reverse;
+      justify-content: flex-end;
+    }
+
+    .star-rating input { display: none; }
+
+    .star-rating label {
+      font-size: 20px;
+      color: #444;
+      cursor: pointer;
+    }
+
+    .star-rating input:checked ~ label,
+    .star-rating label:hover,
+    .star-rating label:hover ~ label {
+      color: #f5c518;
+    }
+
+    .flash {
+      background: #1a3a1a;
+      color: #2ecc71;
+      padding: 10px;
+      text-align: center;
+    }
+  </style>
+</head>
+
+<body>
+
+<nav>
+  <h1>LUMEORA</h1>
+  <a href="/">← Back</a>
+</nav>
+
+<!-- Flash Message -->
+{% with messages = get_flashed_messages() %}
+  {% if messages %}
+    {% for message in messages %}
+      <div class="flash">{{ message }}</div>
+    {% endfor %}
+  {% endif %}
+{% endwith %}
+
+{% if movies %}
+
+<div class="results-header">
+  <h2>{{ movies|length }} movies found</h2>
+</div>
+
+<div class="movie-grid">
+
+  {% for movie in movies %}
+  <div class="movie-card">
+
+    <!-- Poster -->
+    <div class="poster-wrapper">
+      <img src="{{ url_for('static', filename='images/' + movie.image_url) }}">
+    </div>
+
+    <!-- Info -->
+    <div class="movie-info">
+      <h4>{{ movie.title }}</h4>
+      <div class="movie-meta">
+        <span>{{ movie.language }}</span>
+        <span>{{ movie.duration }} min</span>
+      </div>
+    </div>
+
+    <!-- Review Form -->
+    <div class="review-form">
+      <form action="/submit_review" method="POST">
+
+        <input type="hidden" name="movie_id" value="{{ movie.movie_id }}">
+
+        <!-- ⭐ STAR RATING (FIXED) -->
+        <div class="star-rating">
+          {% for i in [5,4,3,2,1] %}
+            <input
+              type="radio"
+              name="rating"
+              id="star{{ i }}_{{ movie.movie_id }}"
+              value="{{ i }}"
+              required
+            >
+            <label for="star{{ i }}_{{ movie.movie_id }}">★</label>
+          {% endfor %}
+        </div>
+
+        <!-- Review -->
+        <textarea name="review" placeholder="Write your review..." required></textarea>
+
+        <button type="submit" class="btn-submit">Submit Review</button>
+
+      </form>
+    </div>
+
+  </div>
+  {% endfor %}
+
+</div>
+
+{% else %}
+
+<div style="text-align:center; padding:50px;">
+  <h3>No movies found 😔</h3>
+</div>
+
+{% endif %}
+
+</body>
+</html>
